@@ -1,20 +1,28 @@
 import React from 'react'
 
+import Button from '../../shared/components/FormElements/Button'
 import Card from '../../shared/components/UIElements/Card'
-import './PlaceList.css'
+import './PlaceItem.css'
 
-const PlaceItem = () => {
-    if(items.length === 0) {
-        return <div className='place-list center'>
-            <Card>
-                <h2>No places found. Maybe create one?</h2>
-            </Card>
-        </div>
-    }
+const PlaceItem = ({id, image, title, description, address}) => {
   return (
-    <div>
-      
-    </div>
+    <li className='place-item'>
+      <Card className='place-item__content'>
+      <div className='place-item__image'>
+        <img src={image} alt={title} />
+      </div>
+      <div className='place-item__info'>
+        <h2>{title}</h2>
+        <h3>{address}</h3>
+        <p>{description}</p>
+      </div>
+      <div className='place-item__actions'>
+        <Button inverse>VIEW ON MAP</Button>
+        <Button to={`/places/${id}`}>EDIT</Button>
+        <Button danger>DELETE</Button>
+      </div>
+      </Card>
+    </li>
   )
 }
 
