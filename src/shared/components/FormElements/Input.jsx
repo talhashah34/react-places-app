@@ -1,5 +1,7 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useEffect } from 'react'
 
+
+import { validate } from '../../util/validators'
 import './Input.css'
 
 const inputReducer = (state, action) => {
@@ -8,18 +10,35 @@ const inputReducer = (state, action) => {
             return{
                 ...state,
                 value: action.val,
-                isValid: true
+                isValid: validate(action.val, action.validators)
+            }
+        case "TOUCH":
+            return{
+                ...state,
+                isTouched: true
             }
         default:
             return state;
     }
 }
 
-const Input = ({id, element, rows, type, label, placeholder, errorMsg}) => {
-    const [inputState, dispatch] = useReducer(inputReducer, {value: '', isValid: false})
+const Input = ({id, element, rows, type, label, placeholder, errorMsg, validators, onInput}) => {
+    const [inputState, dispatch] = useReducer(inputReducer, {value: '', isTouched: false, isValid: false})
+
+    const {value, isValid} = inputState
+    useEffect(() => {
+        onInput(id, inputState.value, inputState.isValid)
+    },[id, value, isValid, onInput])
+
 
     const changeHandler = (e) => {
-        dispatch({type: "CHANGE", val: e.target.value})
+        dispatch({type: "CHANGE", val: e.target.value, validators: validators})
+    }
+
+    const touchHandler = () => {
+        dispatch({
+            type: 'TOUCH',
+        })
     }
 
     const inputElement = element === 'input' ? (
@@ -28,6 +47,7 @@ const Input = ({id, element, rows, type, label, placeholder, errorMsg}) => {
             type={type}
             placeholder={placeholder}
             onChange={changeHandler}
+            onBlur={touchHandler}
             value={inputState.value}
         />
     ) : (
@@ -35,6 +55,7 @@ const Input = ({id, element, rows, type, label, placeholder, errorMsg}) => {
             id={id}
             rows={rows || 3}
             onChange={changeHandler}
+            onBlur={touchHandler}
             value={inputState.value}
         />
     )
@@ -42,10 +63,10 @@ const Input = ({id, element, rows, type, label, placeholder, errorMsg}) => {
     return (
         <div 
         className={`form-control 
-        ${!inputState.isValid && 'form-control--invalid'}`}>
+        ${!inputState.isValid && inputState.isTouched && 'form-control--invalid'}`}>
             <label htmlFor={id}>{label}</label>
             {inputElement}
-            {!inputState.isValid && <p>{errorMsg}</p>}
+            {!inputState.isValid && inputState.isTouched && <p>{errorMsg}</p>}
         </div>
     )
 }
